@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: filevault-service
+  labels:
+    app: filevault
+spec:
+  type: LoadBalancer
+  selector:
+    app: filevault
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  sessionAffinity: None
