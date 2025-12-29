@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   filevault:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: filevaultregistry2025.azurecr.io/filevault:latest
     container_name: filevault-app
     ports:
       - "3000:3000"

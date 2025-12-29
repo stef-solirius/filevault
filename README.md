@@ -142,11 +142,57 @@ npm install express multer dotenv @azure/storage-blob
 
 ## Running and Accessing the Application
 
+### Running locally with Node.js
+
 ```
 node index.js
 ```
 
 Open your browser and navigate to `http://localhost:3000`.
+
+### Running with Docker Compose
+
+The application is containerized and stored in Azure Container Registry.
+
+1. Login to Azure Container Registry:
+```bash
+az acr login --name filevaultregistry2025
+```
+
+2. Run the application:
+```bash
+docker-compose up -d
+```
+
+3. Access the application at `http://localhost:3000`
+
+4. Stop the application:
+```bash
+docker-compose down
+```
+
+## Azure Container Registry
+
+The Docker image is stored in a private Azure Container Registry:
+- **Registry**: filevaultregistry2025.azurecr.io
+- **Image**: filevault:latest
+- **Location**: UK South
+
+### Pushing Updates to the Registry
+
+```bash
+# Build the image
+docker build -t filevault:latest .
+
+# Tag for ACR
+docker tag filevault:latest filevaultregistry2025.azurecr.io/filevault:latest
+
+# Login to ACR
+az acr login --name filevaultregistry2025
+
+# Push to registry
+docker push filevaultregistry2025.azurecr.io/filevault:latest
+```
 
 ## Technologies Used
 
