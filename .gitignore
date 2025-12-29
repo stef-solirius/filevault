@@ -29,3 +29,13 @@ Thumbs.db
 
 # Uploads
 **/uploads/
+
+# Test coverage
+coverage/
+*.lcov
+
+# SonarQube
+.scannerwork/
+
+# CI/CD artifacts
+*.tgz

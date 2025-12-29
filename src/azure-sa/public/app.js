@@ -1,3 +1,4 @@
+/* eslint-env browser */
 document.getElementById('noteForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -66,9 +67,10 @@ async function loadFiles() {
     notesList.appendChild(table);
 }
 
+// eslint-disable-next-line no-unused-vars
 async function deleteFile(fileKey) {
     const response = await fetch(`/files/${fileKey}`, {
-        method: 'DELETE',
+        method: 'DELETE'
     });
 
     if (response.ok) {

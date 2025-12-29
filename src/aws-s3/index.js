@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { Upload } = require('@aws-sdk/lib-storage');
 
 const app = express();
@@ -16,7 +16,7 @@ const s3 = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     }
 });
 
@@ -51,12 +51,12 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             const uploadParams = {
                 Bucket: process.env.S3_BUCKET_NAME,
                 Key: req.file.filename,
-                Body: fileStream,
+                Body: fileStream
             };
 
             const upload = new Upload({
                 client: s3,
-                params: uploadParams,
+                params: uploadParams
             });
 
             await upload.done();
@@ -85,7 +85,7 @@ app.delete('/files/:key', async (req, res) => {
     try {
         const deleteParams = {
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: fileKey,
+            Key: fileKey
         };
 
         await s3.send(new DeleteObjectCommand(deleteParams));
