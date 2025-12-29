@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  filevault:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: filevault-app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - AZURE_STORAGE_ACCOUNT_NAME=${AZURE_STORAGE_ACCOUNT_NAME}
+      - AZURE_STORAGE_ACCOUNT_KEY=${AZURE_STORAGE_ACCOUNT_KEY}
+      - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./src/azure-sa/filesData.json:/app/filesData.json
+    restart: unless-stopped
