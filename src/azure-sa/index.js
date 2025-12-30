@@ -105,6 +105,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 app.get('/files', (req, res) => {
+    // Reload files from disk to ensure fresh data
+    files = loadFilesData();
     res.json(files);
 });
 
@@ -132,6 +134,11 @@ app.delete('/files/:key', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    logger.info(`Server is running on port ${PORT}`);
-});
+// Only start server if this file is run directly (not required in tests)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        logger.info(`Server is running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
