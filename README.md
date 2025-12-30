@@ -199,6 +199,23 @@ docker push filevaultregistry2025.azurecr.io/filevault:latest
 - Node.js
 - AWS S3 or Azure Storage Accounts
 - HTML, CSS, JavaScript
+- Docker
+- GitHub Actions (CI/CD)
+- Azure Container Registry
+- Azure App Service
+- Azure Key Vault
+
+## CI/CD Pipeline
+
+The project includes an automated CI/CD pipeline using GitHub Actions:
+
+- **Continuous Integration**: Automated linting, testing, and code quality analysis
+- **Continuous Deployment**: Automated deployment to Azure App Service
+- **Secrets Management**: Integration with Azure Key Vault for secure credential management
+
+For detailed setup and deployment instructions, see:
+- [Deployment Guide](docs/DEPLOYMENT.md) - Complete Azure setup and pipeline configuration
+- [Secrets Configuration](docs/SECRETS_TEMPLATE.md) - GitHub secrets setup checklist
 
 ## To-Do
 
