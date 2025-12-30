@@ -122,8 +122,9 @@ jobs:
           tags: |
             ${{ secrets.ACR_LOGIN_SERVER }}/filevault:latest
             ${{ secrets.ACR_LOGIN_SERVER }}/filevault:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ secrets.ACR_LOGIN_SERVER }}/filevault:latest
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
 
   deploy:
     name: Deploy to Azure App Service
