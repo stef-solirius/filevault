@@ -30,6 +30,10 @@ Thumbs.db
 # Uploads
 **/uploads/
 
+# Data files
+filesData.json
+**/filesData.json
+
 # Test coverage
 coverage/
 *.lcov

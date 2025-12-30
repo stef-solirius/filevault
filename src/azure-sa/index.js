@@ -39,7 +39,7 @@ const blobServiceClient = new BlobServiceClient(
 
 const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINER_NAME);
 
-const filesDataPath = './filesData.json';
+const filesDataPath = path.join(__dirname, 'filesData.json');
 
 const loadFilesData = () => {
     if (fs.existsSync(filesDataPath)) {
