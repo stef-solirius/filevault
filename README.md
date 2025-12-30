@@ -204,6 +204,8 @@ docker push filevaultregistry2025.azurecr.io/filevault:latest
 - Azure Container Registry
 - Azure App Service
 - Azure Key Vault
+- Prometheus & Grafana (Monitoring)
+- Azure Application Insights (Logging)
 
 ## CI/CD Pipeline
 
@@ -216,14 +218,24 @@ The project includes an automated CI/CD pipeline using GitHub Actions:
 For detailed setup and deployment instructions, see:
 - [Deployment Guide](docs/DEPLOYMENT.md) - Complete Azure setup and pipeline configuration
 - [Secrets Configuration](docs/SECRETS_TEMPLATE.md) - GitHub secrets setup checklist
+- [Monitoring Guide](docs/MONITORING.md) - Monitoring, alerting, and observability setup
+
+## Monitoring and Observability
+
+FileVault includes comprehensive monitoring and alerting capabilities:
+
+- **Prometheus**: Custom metrics for HTTP requests, file operations, and Azure Blob Storage performance
+- **Grafana**: Pre-configured dashboards for real-time visualization
+- **Azure Application Insights**: Centralized logging and Azure-native monitoring
+- **Alertmanager**: Intelligent alert routing and notifications
+
+For complete setup instructions, metrics catalog, and troubleshooting guide, see [Monitoring Guide](docs/MONITORING.md).
 
 ## To-Do
 
+- [x] **Monitoring and Alerting**: Implement Prometheus, Grafana, and Azure Monitor integration
 - [ ] **Use a Database for Persistent Data**: Replace the `filesData.json` with a database (e.g., MongoDB, PostgreSQL) to store file metadata persistently.
-
 - [ ] **User Authentication**: Implement user authentication to manage user-specific files securely.
-
 - [ ] **File Search and Filtering**: Add functionality to search and filter files in the table.
-
 - [ ] **Drag and Drop Upload**: Enhance the upload feature with drag and drop functionality.
 

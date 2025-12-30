@@ -1,0 +1,129 @@
+groups:
+  - name: filevault_alerts
+    interval: 30s
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: |
+          rate(errors_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: filevault
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors per second (threshold: 10/min)"
+
+      # Slow response time alert
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: filevault
+        annotations:
+          summary: "Slow HTTP response time"
+          description: "P95 response time is {{ $value }}s (threshold: 2s)"
+
+      # Very slow response time - critical
+      - alert: VerySlowResponseTime
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+        for: 3m
+        labels:
+          severity: critical
+          component: filevault
+        annotations:
+          summary: "Very slow HTTP response time"
+          description: "P95 response time is {{ $value }}s (threshold: 5s)"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: |
+          (process_resident_memory_bytes / 1024 / 1024) > 400
+        for: 5m
+        labels:
+          severity: warning
+          component: filevault
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}MB (threshold: 400MB)"
+
+      # Container/Pod down
+      - alert: ContainerDown
+        expr: |
+          up{job="filevault-app"} == 0 or up{job="kubernetes-pods", app="filevault"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: filevault
+        annotations:
+          summary: "FileVault container is down"
+          description: "FileVault application is unreachable"
+
+      # High file upload failure rate
+      - alert: HighUploadFailureRate
+        expr: |
+          rate(file_operations_total{operation="upload", status="failure"}[5m]) 
+          / 
+          rate(file_operations_total{operation="upload"}[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          component: filevault
+        annotations:
+          summary: "High file upload failure rate"
+          description: "Upload failure rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      # High file delete failure rate
+      - alert: HighDeleteFailureRate
+        expr: |
+          rate(file_operations_total{operation="delete", status="failure"}[5m]) 
+          / 
+          rate(file_operations_total{operation="delete"}[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          component: filevault
+        annotations:
+          summary: "High file delete failure rate"
+          description: "Delete failure rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      # Slow Azure Blob operations
+      - alert: SlowAzureBlobOperations
+        expr: |
+          histogram_quantile(0.95, rate(azure_blob_operation_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: filevault
+        annotations:
+          summary: "Slow Azure Blob Storage operations"
+          description: "P95 Azure Blob operation duration is {{ $value }}s (threshold: 5s)"
+
+      # High HTTP 5xx error rate
+      - alert: High5xxErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m])) 
+          / 
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+          component: filevault
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "5xx error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # No requests received (service might be down or not receiving traffic)
+      - alert: NoRequestsReceived
+        expr: |
+          rate(http_requests_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          component: filevault
+        annotations:
+          summary: "No HTTP requests received"
+          description: "No requests have been received in the last 10 minutes"

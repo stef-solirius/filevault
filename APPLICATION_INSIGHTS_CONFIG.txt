@@ -1,0 +1,39 @@
+﻿==============================================
+Application Insights Configuration Complete
+==============================================
+
+Resource Details:
+-----------------
+Name: filevault-insights
+Location: UK South
+Resource Group: filevault-rg
+Application Type: web
+
+Connection String:
+-----------------
+InstrumentationKey=fda735b5-75d0-479c-bdf2-b430362d4817;IngestionEndpoint=https://uksouth-1.in.applicationinsights.azure.com/;LiveEndpoint=https://uksouth.livediagnostics.monitor.azure.com/;ApplicationId=5279b986-f85b-4b59-ab08-3286bb303889
+
+Instrumentation Key:
+-------------------
+fda735b5-75d0-479c-bdf2-b430362d4817
+
+Application ID:
+--------------
+5279b986-f85b-4b59-ab08-3286bb303889
+
+Configuration Applied To:
+------------------------
+✓ src/azure-sa/.env (local development)
+✓ config/k8s-secrets.yaml (Kubernetes)
+✓ Current PowerShell session
+
+Azure Portal Access:
+-------------------
+View your Application Insights data at:
+https://portal.azure.com/#@/resource/subscriptions/6f414141-d71f-4950-b1f5-bf1e08b82e96/resourceGroups/filevault-rg/providers/microsoft.insights/components/filevault-insights/overview
+
+Next Steps:
+----------
+1. Install dependencies: npm install
+2. Start the application to begin sending telemetry
+3. View metrics in Azure Portal or Grafana dashboard

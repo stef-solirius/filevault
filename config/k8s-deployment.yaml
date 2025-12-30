@@ -13,6 +13,10 @@ spec:
     metadata:
       labels:
         app: filevault
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: filevault
@@ -39,6 +43,15 @@ spec:
             secretKeyRef:
               name: filevault-secrets
               key: azure-container-name
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: filevault-secrets
+              key: applicationinsights-connection-string
+        - name: PROMETHEUS_ENABLED
+          value: "true"
+        - name: LOG_LEVEL
+          value: "info"
         resources:
           requests:
             memory: "128Mi"

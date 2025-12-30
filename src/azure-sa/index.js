@@ -4,6 +4,22 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+// Initialize Application Insights if connection string is provided
+if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
+    const appInsights = require('applicationinsights');
+    appInsights.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
+        .setAutoDependencyCorrelation(true)
+        .setAutoCollectRequests(true)
+        .setAutoCollectPerformance(true, true)
+        .setAutoCollectExceptions(true)
+        .setAutoCollectDependencies(true)
+        .setAutoCollectConsole(true)
+        .setUseDiskRetryCaching(true)
+        .start();
+}
+
+const logger = require('./logger');
+const { register, metricsMiddleware, metrics } = require('./metrics');
 const { BlobServiceClient, StorageSharedKeyCredential } = require('@azure/storage-blob');
 
 const app = express();
@@ -42,6 +58,17 @@ let files = loadFilesData();
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (err) {
+        logger.error('Error generating metrics', { error: err.message });
+        res.status(500).end(err);
+    }
+});
+
 app.post('/upload', upload.single('file'), async (req, res) => {
     const fileName = req.body.note;
     if (!fileName) {
@@ -49,19 +76,27 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 
     if (req.file) {
+        const uploadStart = Date.now();
         try {
             const blobName = req.file.filename;
             const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
             await blockBlobClient.uploadFile(req.file.path);
+            const uploadDuration = (Date.now() - uploadStart) / 1000;
+            metrics.azureBlobOperationDuration.observe({ operation: 'upload' }, uploadDuration);
+            
             fs.unlinkSync(req.file.path); // remove the file locally after upload
 
             files.push({ name: fileName, key: blobName });
             saveFilesData(files);
 
+            metrics.fileOperations.inc({ operation: 'upload', status: 'success' });
+            logger.info('File uploaded successfully', { fileName, blobName, duration: uploadDuration });
             res.status(200).send('File uploaded successfully.');
         } catch (err) {
-            console.error('Error uploading file:', err);
+            metrics.fileOperations.inc({ operation: 'upload', status: 'failure' });
+            metrics.errorTotal.inc({ type: 'azure_blob', operation: 'upload' });
+            logger.error('Error uploading file', { error: err.message, fileName });
             res.status(500).send('Failed to upload file.');
         }
     } else {
@@ -75,21 +110,28 @@ app.get('/files', (req, res) => {
 
 app.delete('/files/:key', async (req, res) => {
     const fileKey = req.params.key;
+    const deleteStart = Date.now();
 
     try {
         const blockBlobClient = containerClient.getBlockBlobClient(fileKey);
         await blockBlobClient.delete();
+        const deleteDuration = (Date.now() - deleteStart) / 1000;
+        metrics.azureBlobOperationDuration.observe({ operation: 'delete' }, deleteDuration);
 
         files = files.filter(file => file.key !== fileKey);
         saveFilesData(files);
 
+        metrics.fileOperations.inc({ operation: 'delete', status: 'success' });
+        logger.info('File deleted successfully', { fileKey, duration: deleteDuration });
         res.status(200).send('File deleted successfully.');
     } catch (err) {
-        console.error('Error deleting file:', err);
+        metrics.fileOperations.inc({ operation: 'delete', status: 'failure' });
+        metrics.errorTotal.inc({ type: 'azure_blob', operation: 'delete' });
+        logger.error('Error deleting file', { error: err.message, fileKey });
         res.status(500).send('Failed to delete file.');
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    logger.info(`Server is running on port ${PORT}`);
 });
