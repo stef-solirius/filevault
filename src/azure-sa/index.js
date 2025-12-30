@@ -19,7 +19,7 @@ if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING) {
 }
 
 const logger = require('./logger');
-const { register, metricsMiddleware, metrics } = require('./metrics');
+const { register, metrics } = require('./metrics');
 const { BlobServiceClient, StorageSharedKeyCredential } = require('@azure/storage-blob');
 
 const app = express();
@@ -84,7 +84,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             await blockBlobClient.uploadFile(req.file.path);
             const uploadDuration = (Date.now() - uploadStart) / 1000;
             metrics.azureBlobOperationDuration.observe({ operation: 'upload' }, uploadDuration);
-            
+
             fs.unlinkSync(req.file.path); // remove the file locally after upload
 
             files.push({ name: fileName, key: blobName });
