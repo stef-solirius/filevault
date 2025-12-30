@@ -191,7 +191,7 @@ This document provides a quick reference for the FileVault CI/CD pipeline.
 Add these badges to your README to show pipeline status:
 
 ```markdown
-![CI Pipeline](https://github.com/yourusername/filevault/actions/workflows/ci.yml/badge.svg?branch=main)
+![CI Pipeline](https://github.com/yourusername/filevault/actions/workflows/cicd.yml/badge.svg?branch=main)
 ```
 
 ## Monitoring Pipeline Runs

@@ -13,7 +13,7 @@ The CI/CD pipeline is configured using **GitHub Actions** and includes three mai
 ## Pipeline Structure
 
 ### Workflow File
-Location: `.github/workflows/ci.yml`
+Location: `.github/workflows/cicd.yml`
 
 ### Pipeline Stages
 

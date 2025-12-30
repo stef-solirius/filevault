@@ -6,7 +6,7 @@ This document summarizes the Continuous Deployment (CD) pipeline implementation 
 ## What Was Implemented
 
 ### 1. Extended CI Pipeline
-The existing CI pipeline (.github/workflows/ci.yml) has been extended with two new stages:
+The existing CI pipeline (.github/workflows/cicd.yml) has been extended with two new stages:
 
 #### Build and Push Stage
 - Builds Docker image from `config/Dockerfile`
