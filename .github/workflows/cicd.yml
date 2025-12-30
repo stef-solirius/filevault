@@ -145,12 +145,10 @@ jobs:
           
       - name: Retrieve secrets from Azure Key Vault
         id: keyvault
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
-            echo "AZURE_STORAGE_ACCOUNT_NAME=$(az keyvault secret show --name AZURE-STORAGE-ACCOUNT-NAME --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
-            echo "AZURE_STORAGE_ACCOUNT_KEY=$(az keyvault secret show --name AZURE-STORAGE-ACCOUNT-KEY --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
-            echo "AZURE_CONTAINER_NAME=$(az keyvault secret show --name AZURE-CONTAINER-NAME --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
+        run: |
+          echo "AZURE_STORAGE_ACCOUNT_NAME=$(az keyvault secret show --name AZURE-STORAGE-ACCOUNT-NAME --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
+          echo "AZURE_STORAGE_ACCOUNT_KEY=$(az keyvault secret show --name AZURE-STORAGE-ACCOUNT-KEY --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
+          echo "AZURE_CONTAINER_NAME=$(az keyvault secret show --name AZURE-CONTAINER-NAME --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
             
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
