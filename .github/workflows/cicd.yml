@@ -143,47 +143,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
-      - name: Retrieve secrets from Azure Key Vault
-        id: keyvault
-        run: |
-          echo "AZURE_STORAGE_ACCOUNT_NAME=$(az keyvault secret show --name AZURE-STORAGE-ACCOUNT-NAME --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
-          echo "AZURE_STORAGE_ACCOUNT_KEY=$(az keyvault secret show --name AZURE-STORAGE-ACCOUNT-KEY --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
-          echo "AZURE_CONTAINER_NAME=$(az keyvault secret show --name AZURE-CONTAINER-NAME --vault-name ${{ secrets.KEY_VAULT_NAME }} --query value -o tsv)" >> $GITHUB_OUTPUT
-            
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           images: ${{ secrets.ACR_LOGIN_SERVER }}/filevault:${{ github.sha }}
-          
-      - name: Configure App Settings
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          app-settings-json: |
-            [
-              {
-                "name": "PORT",
-                "value": "3000",
-                "slotSetting": false
-              },
-              {
-                "name": "AZURE_STORAGE_ACCOUNT_NAME",
-                "value": "${{ steps.keyvault.outputs.AZURE_STORAGE_ACCOUNT_NAME }}",
-                "slotSetting": false
-              },
-              {
-                "name": "AZURE_STORAGE_ACCOUNT_KEY",
-                "value": "${{ steps.keyvault.outputs.AZURE_STORAGE_ACCOUNT_KEY }}",
-                "slotSetting": false
-              },
-              {
-                "name": "AZURE_CONTAINER_NAME",
-                "value": "${{ steps.keyvault.outputs.AZURE_CONTAINER_NAME }}",
-                "slotSetting": false
-              }
-            ]
             
       - name: Azure Logout
         run: az logout
