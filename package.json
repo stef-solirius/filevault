@@ -14,6 +14,7 @@
     "mcp:test": "node mcp/client-test.js",
     "mcp:devops": "node mcp/devops-server.js",
     "mcp:devops:test": "node mcp/devops-test.js",
+    "mcp:integration:test": "node mcp/integration-test.js",
     "deploy:checks": "node mcp/deployment-automation.js checks",
     "deploy:dev": "node mcp/deployment-automation.js deploy dev",
     "deploy:staging": "node mcp/deployment-automation.js deploy staging",
