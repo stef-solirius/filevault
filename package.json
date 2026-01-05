@@ -10,14 +10,14 @@
     "test:watch": "jest --watch",
     "test:aws": "jest tests/aws-s3",
     "test:azure": "jest tests/azure-sa",
-    "mcp:server": "node mcp-server.js",
-    "mcp:test": "node mcp-client-test.js",
-    "mcp:devops": "node mcp-devops-server.js",
-    "mcp:devops:test": "node mcp-devops-test.js",
-    "deploy:checks": "node deployment-automation.js checks",
-    "deploy:dev": "node deployment-automation.js deploy dev",
-    "deploy:staging": "node deployment-automation.js deploy staging",
-    "deploy:production": "node deployment-automation.js deploy production"
+    "mcp:server": "node mcp/server.js",
+    "mcp:test": "node mcp/client-test.js",
+    "mcp:devops": "node mcp/devops-server.js",
+    "mcp:devops:test": "node mcp/devops-test.js",
+    "deploy:checks": "node mcp/deployment-automation.js checks",
+    "deploy:dev": "node mcp/deployment-automation.js deploy dev",
+    "deploy:staging": "node mcp/deployment-automation.js deploy staging",
+    "deploy:production": "node mcp/deployment-automation.js deploy production"
   },
   "devDependencies": {
     "eslint": "^8.57.1",

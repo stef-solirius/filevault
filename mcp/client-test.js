@@ -17,7 +17,7 @@ async function testMCPServer() {
   // Create transport that will spawn the server
   const transport = new StdioClientTransport({
     command: 'node',
-    args: ['mcp-server.js'],
+    args: ['mcp/server.js'],
   });
 
   try {

@@ -1,0 +1,42 @@
+# Use Node.js LTS version as base image
+FROM node:18-alpine
+
+# Install git for DevOps MCP server functionality
+RUN apk add --no-cache git
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies (including MCP SDK)
+RUN npm install --production
+
+# Copy MCP server files
+COPY mcp/ ./mcp/
+
+# Copy documentation
+COPY docs/ ./docs/
+
+# Create necessary directories
+RUN mkdir -p logs
+
+# Expose port for health check endpoint (if needed)
+EXPOSE 3001
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV MCP_SERVER_PORT=3001
+
+# Health check script
+COPY config/mcp-healthcheck.js ./healthcheck.js
+
+# Default to running the basic MCP server
+# Can be overridden with docker run command
+CMD ["node", "mcp/server.js"]
+
+# Labels for metadata
+LABEL maintainer="FileVault Team"
+LABEL description="MCP Servers for FileVault - DevOps automation and storage management"
+LABEL version="1.0.0"

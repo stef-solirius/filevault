@@ -16,7 +16,7 @@ async function testDevOpsServer() {
 
   const transport = new StdioClientTransport({
     command: 'node',
-    args: ['mcp-devops-server.js'],
+    args: ['mcp/devops-server.js'],
   });
 
   try {
