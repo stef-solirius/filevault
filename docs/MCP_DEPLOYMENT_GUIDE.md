@@ -1,7 +1,9 @@
-# MCP Server Deployment Guide
+# MCP Server CI/CD Integration Guide
 
 ## Overview
-This guide explains how MCP servers are integrated into the FileVault CI/CD pipeline and deployed to Azure.
+This guide explains how MCP servers are integrated into the FileVault CI/CD pipeline for testing and validation.
+
+**Important**: MCP (Model Context Protocol) servers are designed to run **locally** on developer machines or AI assistant environments using stdio (standard input/output). They are **not** deployed as web services. The CI/CD pipeline validates MCP functionality, but deployment is manual for local use.
 
 ## CI/CD Pipeline Integration
 
@@ -54,14 +56,11 @@ Dedicated MCP server testing:
 Code quality and security analysis (depends on both test jobs).
 
 #### 5. Build and Push
-Two parallel build jobs:
-- **Main Application**: Builds FileVault API Docker image
-- **MCP Servers**: Builds MCP servers Docker image
+- **Main Application**: Builds FileVault API Docker image and deploys to Azure
 
 #### 6. Deploy
-Two parallel deployment jobs:
 - **Main Application**: Deploys to Azure App Service
-- **MCP Servers**: Deploys MCP servers to dedicated Azure App Service
+- **MCP Servers**: Not deployed (run locally only)
 
 ## Docker Images
 
@@ -69,11 +68,12 @@ Two parallel deployment jobs:
 - **Registry**: `<ACR_LOGIN_SERVER>/filevault:latest`
 - **Tag**: Also tagged with commit SHA
 - **Dockerfile**: `config/Dockerfile`
+- **Deployment**: Azure App Service
 
-### MCP Servers Image
-- **Registry**: `<ACR_LOGIN_SERVER>/filevault-mcp:latest`
-- **Tag**: Also tagged with commit SHA
+### MCP Servers Image (Local Development Only)
 - **Dockerfile**: `config/Dockerfile.mcp`
+- **Build manually**: `docker build -f config/Dockerfile.mcp -t filevault-mcp:latest .`
+- **Usage**: Local development and distribution to team members
 - **Contents**:
   - Node.js 18 Alpine
   - Git (for DevOps operations)
@@ -93,7 +93,6 @@ Configure these secrets in your GitHub repository settings:
 ### Azure Deployment
 - `AZURE_CREDENTIALS` - Azure service principal credentials (JSON)
 - `AZURE_WEBAPP_NAME` - Main application web app name
-- `AZURE_MCP_WEBAPP_NAME` - MCP servers web app name
 
 ### Code Quality
 - `SONAR_TOKEN` - SonarQube authentication token
@@ -111,109 +110,72 @@ Trigger manually using GitHub CLI:
 gh workflow run cicd.yml --ref main
 ```
 
-## Environment Configuration
+## MCP Server Usage
 
-### Production Environment
-- **Name**: `production` (main app)
-- **Name**: `mcp-production` (MCP servers)
-- **Protection Rules**: Recommended to add manual approval
+### Local Development
+MCP servers run locally on your development machine:
 
-### Environment Variables
-Configure in Azure App Service settings:
-
-#### MCP Server Variables
-```
-NODE_ENV=production
-MCP_SERVER_PORT=3001
-```
-
-#### Optional Variables
-```
-# For GitHub Actions integration (DevOps MCP)
-GITHUB_TOKEN=<token>
-
-# For container operations (if needed)
-DOCKER_HOST=<host>
-```
-
-## Running Different MCP Servers
-
-The Docker image can run different MCP servers by overriding the CMD:
-
-### Basic MCP Server (default)
 ```bash
-docker run <ACR_LOGIN_SERVER>/filevault-mcp:latest
+# Run basic MCP server
+npm run mcp:server
+
+# Run DevOps MCP server
+npm run mcp:devops
 ```
 
-### DevOps MCP Server
+### AI Assistant Integration
+Configure your AI assistant (Claude Desktop, etc.) to use the MCP servers:
+
+```json
+{
+  "mcpServers": {
+    "filevault": {
+      "command": "node",
+      "args": ["path/to/filevault/mcp/server.js"]
+    },
+    "filevault-devops": {
+      "command": "node",
+      "args": ["path/to/filevault/mcp/devops-server.js"]
+    }
+  }
+}
+```
+
+## Running MCP Servers with Docker (Optional)
+
+For containerized local development:
+
+### Build the Image
 ```bash
-docker run <ACR_LOGIN_SERVER>/filevault-mcp:latest node mcp/devops-server.js
+docker build -f config/Dockerfile.mcp -t filevault-mcp:latest .
 ```
 
-## Health Checks
-
-The MCP server image includes a health check script:
+### Run Basic MCP Server
 ```bash
-node healthcheck.js
+docker run -i filevault-mcp:latest node mcp/server.js
 ```
 
-Configure in Azure App Service:
-- **Path**: `/health` (if HTTP endpoint is implemented)
-- **Interval**: 30 seconds
-- **Timeout**: 5 seconds
-
-## Monitoring
-
-### Application Insights
-The MCP servers can integrate with Azure Application Insights:
-
-```javascript
-// Add to server files
-const appInsights = require('applicationinsights');
-appInsights.setup(process.env.APPLICATIONINSIGHTS_CONNECTION_STRING)
-  .setAutoCollectRequests(true)
-  .setAutoCollectPerformance(true)
-  .setAutoCollectExceptions(true)
-  .start();
-```
-
-### Logs
-View logs in Azure:
+### Run DevOps MCP Server
 ```bash
-az webapp log tail --name <AZURE_MCP_WEBAPP_NAME> --resource-group <RESOURCE_GROUP>
+docker run -i filevault-mcp:latest node mcp/devops-server.js
 ```
 
-## Scaling
+Note: The `-i` flag is important for stdio communication.
 
-### Horizontal Scaling
-Configure in Azure App Service:
-- Scale out to multiple instances
-- Use Azure Load Balancer
+## Monitoring MCP Servers
 
-### Vertical Scaling
-Adjust the App Service Plan tier based on requirements.
-
-## Rollback
-
-### Automatic Rollback
-If deployment fails, Azure automatically rolls back to the previous version.
-
-### Manual Rollback
+### Local Logs
+MCP servers output to stderr for status messages:
 ```bash
-# List deployment history
-az webapp deployment list --name <AZURE_MCP_WEBAPP_NAME> --resource-group <RESOURCE_GROUP>
-
-# Rollback to specific deployment
-az webapp deployment list-publishing-credentials --name <AZURE_MCP_WEBAPP_NAME> --resource-group <RESOURCE_GROUP>
+# Run with output
+npm run mcp:server
+# Output: "FileVault MCP Server running on stdio"
 ```
 
-Or use deployment tags:
+### Debugging
+Use Node.js debugging capabilities:
 ```bash
-# Deploy previous version
-az webapp config container set \
-  --name <AZURE_MCP_WEBAPP_NAME> \
-  --resource-group <RESOURCE_GROUP> \
-  --docker-custom-image-name <ACR_LOGIN_SERVER>/filevault-mcp:<previous-sha>
+node --inspect mcp/server.js
 ```
 
 ## Local Development
@@ -248,15 +210,11 @@ npm run mcp:devops:test
 - Run tests locally first: `npm run mcp:test` and `npm run mcp:devops:test`
 - Check for environment-specific issues (Git not available, etc.)
 
-### Deployment Fails
-- Verify Azure credentials in GitHub secrets
-- Check Azure App Service logs
-- Ensure container registry is accessible from Azure
-
 ### MCP Server Not Responding
-- Check health endpoint
-- Review Application Insights logs
-- Verify environment variables are set correctly
+- Verify Node.js and npm are installed
+- Check that all dependencies are installed: `npm install`
+- Ensure Git is installed (for DevOps MCP server)
+- Check stdio communication is not blocked
 
 ## Security Considerations
 
@@ -265,15 +223,10 @@ npm run mcp:devops:test
 - Use GitHub Secrets for CI/CD variables
 - Use Azure Key Vault for runtime secrets
 
-### Network Security
-- Configure Azure App Service network restrictions
-- Use private endpoints for ACR
-- Enable HTTPS only
-
 ### Access Control
 - Limit GitHub Actions permissions
-- Use Azure RBAC for resource access
-- Implement authentication for MCP endpoints (if exposed publicly)
+- MCP servers run locally and don't expose network endpoints
+- Secure repository access to prevent unauthorized code changes
 
 ## Best Practices
 
@@ -285,13 +238,12 @@ npm run mcp:devops:test
 
 ## Next Steps
 
-- [ ] Implement HTTP health endpoint in MCP servers
-- [ ] Add Application Insights telemetry
-- [ ] Set up deployment approval gates
-- [ ] Configure auto-scaling rules
-- [ ] Add deployment notifications (Slack/Teams)
-- [ ] Implement blue-green deployment strategy
-- [ ] Set up staging environment for MCP servers
+- [ ] Add more MCP tools for FileVault operations
+- [ ] Integrate MCP servers with Claude Desktop
+- [ ] Create MCP server distribution package
+- [ ] Add telemetry for tool usage analytics
+- [ ] Implement rate limiting for tool calls
+- [ ] Add caching for expensive operations
 
 ## References
 
