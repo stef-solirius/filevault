@@ -9,7 +9,9 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:aws": "jest tests/aws-s3",
-    "test:azure": "jest tests/azure-sa"
+    "test:azure": "jest tests/azure-sa",
+    "mcp:server": "node mcp-server.js",
+    "mcp:test": "node mcp-client-test.js"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
@@ -20,6 +22,7 @@
     "@aws-sdk/client-s3": "^3.705.0",
     "@aws-sdk/lib-storage": "^3.705.0",
     "@azure/storage-blob": "^12.29.1",
+    "@modelcontextprotocol/sdk": "^1.25.1",
     "applicationinsights": "^2.9.6",
     "dotenv": "^16.4.7",
     "express": "^5.2.1",
